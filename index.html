@@ -209,87 +209,65 @@ function joinChannelClicked(){
   document.getElementById("mainContainer").style.display="block";
 }
 
-/* WATCH SYSTEM - 1 AD THEN COMMENT TASK */
-document.getElementById("watchBtn").addEventListener("click", async ()=>{
-  try{
-    let res = await RewardAd.show(); // show 1 ad only
-    if(res.done){
-      // Show Comment button popup immediately after ad
-      let popup = document.createElement("div");
-      popup.style.position="fixed";
-      popup.style.top="0";
-      popup.style.left="0";
-      popup.style.width="100%";
-      popup.style.height="100%";
-      popup.style.background="rgba(0,0,0,0.9)";
-      popup.style.zIndex="999999999";
-      popup.style.display="flex";
-      popup.style.justifyContent="center";
-      popup.style.alignItems="center";
+/* ==========================
+   COMMENT BUTTON FLOW
+========================== */
 
-      popup.innerHTML = `
-      <div style="background:#fff;padding:20px;border-radius:12px;text-align:center;width:85%;max-width:350px;">
-        <h3>💬 Leave a Comment</h3>
-        <button id="commentBtn" style="padding:12px;background:#007bff;color:#fff;border:none;border-radius:8px;">
-          👉 Click here to Comment
-        </button>
-      </div>
-      `;
+// Add hidden Comment button to main menu
+const commentBtn = document.createElement("button");
+commentBtn.className = "button";
+commentBtn.id = "commentMenuBtn";
+commentBtn.textContent = "💬 Comment";
+commentBtn.style.display = "none"; // hidden initially
+document.getElementById("mainContainer").appendChild(commentBtn);
 
-      document.body.appendChild(popup);
-
-      document.getElementById("commentBtn").onclick = ()=>{
-        popup.remove();
-
-        // Load a random task from taskQueue
-        let availableTasks = taskQueue.filter(t => !tasksCompleted[t]);
-        if(availableTasks.length === 0){
-          availableTasks = taskQueue.slice(); // reset if all done
-          tasksCompleted = {};
-        }
-        let randomTaskId = availableTasks[Math.floor(Math.random()*availableTasks.length)];
-
-        const commentPopup = document.createElement("div");
-        commentPopup.style.position="fixed";
-        commentPopup.style.top="0";
-        commentPopup.style.left="0";
-        commentPopup.style.width="100%";
-        commentPopup.style.height="100%";
-        commentPopup.style.background="rgba(0,0,0,0.9)";
-        commentPopup.style.zIndex="999999999";
-        commentPopup.style.display="flex";
-        commentPopup.style.justifyContent="center";
-        commentPopup.style.alignItems="center";
-
-        commentPopup.innerHTML = `
-        <div style="background:#fff;padding:20px;border-radius:12px;text-align:center;width:85%;max-width:350px;">
-          <h3>📝 Comment Task</h3>
-          <adsgram-task data-block-id="${randomTaskId}" id="commentTask"></adsgram-task>
-        </div>
-        `;
-
-        document.body.appendChild(commentPopup);
-
-        setTimeout(()=>{
-          let taskEl = document.getElementById("commentTask");
-          if(taskEl){
-            taskEl.addEventListener("reward",()=>{
-              addReward(0.05);
-              tasksCompleted[randomTaskId] = true;
-              localStorage.setItem(tasksKey, JSON.stringify(tasksCompleted));
-              alert("🎉 You're successful! Commented on the video. Thanks for your feedback. You also earned $0.05 for watching videos.");
-              commentPopup.remove();
-            });
-          }
-        },500);
-      };
+// WATCH SYSTEM - 1 AD ONLY
+document.getElementById("watchBtn").addEventListener("click", async () => {
+  try {
+    let res = await RewardAd.show(); // show 1 ad
+    if (res.done) {
+      // Show Comment button in menu
+      commentBtn.style.display = "block";
     }
-  }catch(e){
+  } catch (e) {
     console.log(e);
   }
 });
 
-/* TASK SYSTEM */
+// COMMENT BUTTON LOGIC
+commentBtn.addEventListener("click", () => {
+  commentBtn.style.display = "none"; // hide the button after clicked
+
+  // Select a random task
+  let availableTasks = taskQueue.filter(t => !tasksCompleted[t]);
+  if (availableTasks.length === 0) {
+    availableTasks = taskQueue.slice();
+    tasksCompleted = {};
+  }
+  let randomTaskId = availableTasks[Math.floor(Math.random() * availableTasks.length)];
+
+  // Replace main task section with the comment task
+  const newTask = document.createElement("adsgram-task");
+  newTask.setAttribute("data-block-id", randomTaskId);
+  newTask.id = "commentTask";
+
+  const taskSection = document.getElementById("taskSection");
+  taskSection.style.display = "block";
+  const oldTask = document.getElementById("currentTask");
+  if (oldTask) oldTask.replaceWith(newTask);
+
+  newTask.addEventListener("reward", () => {
+    addReward(0.05); // reward $0.05
+    tasksCompleted[randomTaskId] = true;
+    localStorage.setItem(tasksKey, JSON.stringify(tasksCompleted));
+    alert("🎉 You're successful! Commented on the video. Thanks for your feedback. You also earned $0.05 for watching videos.");
+    taskSection.style.display = "none"; // hide task section
+  });
+});
+
+/* ==========================
+   EXISTING TASK SYSTEM
+========================== */
 document.getElementById("taskBtn").addEventListener("click",()=>{
   document.getElementById("taskSection").style.display="block";
   loadTask(taskQueue[taskIndex]);
