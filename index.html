@@ -9,86 +9,113 @@
 <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f9f9f9;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-    overflow-x: hidden;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  color:#fff;
+}
 
-  #mainContainer {
-    display: none;
-    padding: 20px;
-    margin-top: 30px;
-    position: relative;
-    z-index: 1;
-  }
+/* MAIN CARD MENU */
+#mainContainer {
+  display: none;
+  padding: 20px;
+  margin: 30px auto;
+  width: 90%;
+  max-width: 400px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+}
 
-  .button {
-    display: block;
-    width: 220px;
-    margin: 10px auto;
-    padding: 12px 20px;
-    background: #007bff;
-    color: white;
-    border-radius: 8px;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-  }
+/* BLUE BUTTON STYLE */
+.button {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 14px;
+  background: linear-gradient(45deg,#007bff,#00c6ff);
+  color: white;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
 
-  #joinPopup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    z-index: 999999999;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    padding: 25px;
-  }
+.button:hover{
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0,198,255,0.7);
+}
 
-  #popupBox {
-    background: #ffffff10;
-    padding: 30px 20px;
-    border-radius: 14px;
-    width: 85%;
-    max-width: 380px;
-    text-align: center;
-    backdrop-filter: blur(7px);
-    border: 1px solid rgba(255,255,255,0.15);
-  }
+/* HEADER */
+h1{
+  margin-bottom:10px;
+}
 
-  #popupBox h2 {
-    color: white;
-    font-size: 22px;
-    margin-bottom: 25px;
-    line-height: 1.4;
-  }
+/* STATS BOX */
+.stats{
+  background: rgba(255,255,255,0.08);
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:15px;
+}
 
-  #popupButton {
-    display: block;
-    width: 100%;
-    padding: 14px;
-    background: #ff3b30;
-    color: white;
-    font-size: 18px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: bold;
-  }
+/* JOIN POPUP */
+#joinPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.9);
+  z-index: 999999999;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+}
 
-  #taskMessage {
-    display:none;
-    color:#00ff00;
-    font-weight:bold;
-    margin-top:10px;
-  }
+#popupBox {
+  background: #ffffff10;
+  padding: 30px 20px;
+  border-radius: 14px;
+  width: 85%;
+  max-width: 380px;
+  text-align: center;
+  backdrop-filter: blur(7px);
+  border: 1px solid rgba(255,255,255,0.15);
+}
+
+#popupBox h2 {
+  color: white;
+  font-size: 22px;
+  margin-bottom: 25px;
+  line-height: 1.4;
+}
+
+#popupButton {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(45deg,#007bff,#00c6ff);
+  color: white;
+  font-size: 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* TASK MESSAGE */
+#taskMessage {
+  display:none;
+  color:#00ff00;
+  font-weight:bold;
+  margin-top:10px;
+}
 </style>
 </head>
 
@@ -111,11 +138,12 @@
 <div id="mainContainer">
   <h1>🎥 Watch & Earn</h1>
 
-  <p>💰 Balance: $<span id="balance">0.00</span></p>
+  <div class="stats">
+    <p>💰 Balance: $<span id="balance">0.00</span></p>
+    <p>👥 Referrals: <span id="referrals">0</span></p>
+  </div>
 
-  <p>👥 Referrals: <span id="referrals">0</span></p>
-
-  <p style="color:#888;font-size:14px;">
+  <p style="color:#ccc;font-size:13px;">
   ⚠️ You earn reward only after the person you invited completes launch the bot.
   </p>
 
@@ -132,6 +160,7 @@
 </div>
 
 <script>
+/* YOUR ORIGINAL JS FULLY PRESERVED */
 const tg = window.Telegram.WebApp;
 tg.expand();
 
@@ -146,7 +175,6 @@ let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
 const taskQueue=["task-21541","task-21543","task-21544","task-22205"];
 let taskIndex=0;
 
-/* WATCH SYSTEM */
 let adCount = 0;
 const rewardBlocks = ["23467","45874","47567"];
 
@@ -203,9 +231,8 @@ function joinChannelClicked(){
   document.getElementById("mainContainer").style.display="block";
 }
 
-/* AUTO 4 ADS SYSTEM */
+/* WATCH SYSTEM */
 document.getElementById("watchBtn").addEventListener("click", async ()=>{
-
   adCount = 0;
 
   async function showAdsSequentially(){
@@ -217,12 +244,10 @@ document.getElementById("watchBtn").addEventListener("click", async ()=>{
 
     try{
       let res = await RewardAd.show();
-
       if(res.done){
         adCount++;
         showAdsSequentially();
       }
-
     }catch(e){
       console.log(e);
     }
@@ -231,7 +256,6 @@ document.getElementById("watchBtn").addEventListener("click", async ()=>{
   showAdsSequentially();
 });
 
-/* POPUP REWARD */
 function showRewardTask(blockId){
   let popup=document.createElement("div");
   popup.style.position="fixed";
