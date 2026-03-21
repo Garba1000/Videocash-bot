@@ -17,6 +17,8 @@ body {
   text-align: center;
   color:#fff;
 }
+
+/* MAIN CARD MENU */
 #mainContainer {
   display: none;
   padding: 20px;
@@ -28,6 +30,8 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
   backdrop-filter: blur(8px);
 }
+
+/* BLUE BUTTON STYLE */
 .button {
   display: block;
   width: 100%;
@@ -39,13 +43,28 @@ body {
   border: none;
   font-size: 16px;
   cursor: pointer;
+  transition: 0.3s;
 }
+
+.button:hover{
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0,198,255,0.7);
+}
+
+/* HEADER */
+h1{
+  margin-bottom:10px;
+}
+
+/* STATS BOX */
 .stats{
   background: rgba(255,255,255,0.08);
   padding:12px;
   border-radius:10px;
   margin-bottom:15px;
 }
+
+/* JOIN POPUP */
 #joinPopup {
   position: fixed;
   top: 0;
@@ -57,7 +76,9 @@ body {
   display: none;
   justify-content: center;
   align-items: center;
+  padding: 25px;
 }
+
 #popupBox {
   background: #ffffff10;
   padding: 30px 20px;
@@ -65,17 +86,42 @@ body {
   width: 85%;
   max-width: 380px;
   text-align: center;
+  backdrop-filter: blur(7px);
+  border: 1px solid rgba(255,255,255,0.15);
 }
+
+#popupBox h2 {
+  color: white;
+  font-size: 22px;
+  margin-bottom: 25px;
+  line-height: 1.4;
+}
+
+#popupButton {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(45deg,#007bff,#00c6ff);
+  color: white;
+  font-size: 18px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* TASK MESSAGE */
 #taskMessage {
   display:none;
   color:#00ff00;
   font-weight:bold;
+  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
+<!-- JOIN CHANNEL POPUP -->
 <div id="joinPopup">
   <div id="popupBox">
     <h2>🚫 You must join our channel to continue</h2>
@@ -88,6 +134,7 @@ body {
   </div>
 </div>
 
+<!-- MAIN CONTENT -->
 <div id="mainContainer">
   <h1>🎥 Watch & Earn</h1>
 
@@ -122,7 +169,6 @@ let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
 const taskQueue=["task-25600","task-25601","task-25602","task-25603"];
 let taskIndex=0;
 
-let isWatching = false;
 const rewardBlocks = ["25599","25596","25598"];
 
 async function updateUI(){
@@ -163,92 +209,85 @@ function joinChannelClicked(){
   document.getElementById("mainContainer").style.display="block";
 }
 
-/* WATCH SYSTEM (FIXED ONLY) */
+/* WATCH SYSTEM - 1 AD THEN COMMENT TASK */
 document.getElementById("watchBtn").addEventListener("click", async ()=>{
-  if(isWatching) return;
-  isWatching = true;
+  try{
+    let res = await RewardAd.show(); // show 1 ad only
+    if(res.done){
+      // Show Comment button popup immediately after ad
+      let popup = document.createElement("div");
+      popup.style.position="fixed";
+      popup.style.top="0";
+      popup.style.left="0";
+      popup.style.width="100%";
+      popup.style.height="100%";
+      popup.style.background="rgba(0,0,0,0.9)";
+      popup.style.zIndex="999999999";
+      popup.style.display="flex";
+      popup.style.justifyContent="center";
+      popup.style.alignItems="center";
 
-  async function showAd(){
-    try{
-      await RewardAd.show();
-    }catch(e){
-      console.log(e);
-    }
-  }
-
-  await showAd();
-  await showAd();
-  await showAd();
-
-  let randomBlock = rewardBlocks[Math.floor(Math.random()*rewardBlocks.length)];
-  showRewardTask(randomBlock);
-});
-
-function showRewardTask(blockId){
-  let popup=document.createElement("div");
-  popup.style.position="fixed";
-  popup.style.top="0";
-  popup.style.left="0";
-  popup.style.width="100%";
-  popup.style.height="100%";
-  popup.style.background="rgba(0,0,0,0.9)";
-  popup.style.zIndex="999999999";
-  popup.style.display="flex";
-  popup.style.justifyContent="center";
-  popup.style.alignItems="center";
-
-  popup.innerHTML=`
-  <div style="background:#fff;padding:20px;border-radius:12px;text-align:center;width:85%;max-width:350px;">
-    <h3>🎁 Claim Reward</h3>
-    <adsgram-task data-block-id="${blockId}" id="rewardTask"></adsgram-task>
-    <br><br>
-    <button id="commentBtn" style="padding:12px;background:#007bff;color:#fff;border:none;border-radius:8px;">
-      👉 Click here to Comment
-    </button>
-  </div>
-  `;
-
-  document.body.appendChild(popup);
-
-  setTimeout(()=>{
-    let taskEl=document.getElementById("rewardTask");
-    if(taskEl){
-      taskEl.addEventListener("reward",()=>{
-        addReward(0.03);
-        alert("🎉 Reward added!");
-      });
-    }
-  },500);
-
-  document.getElementById("commentBtn").onclick=()=>{
-    let randomTask = taskQueue[Math.floor(Math.random()*taskQueue.length)];
-
-    popup.innerHTML=`
+      popup.innerHTML = `
       <div style="background:#fff;padding:20px;border-radius:12px;text-align:center;width:85%;max-width:350px;">
-        <h3>💬 Complete Comment Task</h3>
-        <adsgram-task data-block-id="${randomTask}" id="commentTask"></adsgram-task>
-        <p id="commentMsg" style="color:green;font-weight:bold;display:none;margin-top:10px;">
-          you're successful comment on and also earn $0.04 for watching the video
-        </p>
+        <h3>💬 Leave a Comment</h3>
+        <button id="commentBtn" style="padding:12px;background:#007bff;color:#fff;border:none;border-radius:8px;">
+          👉 Click here to Comment
+        </button>
       </div>
-    `;
+      `;
 
-    setTimeout(()=>{
-      let taskEl=document.getElementById("commentTask");
-      if(taskEl){
-        taskEl.addEventListener("reward",()=>{
-          addReward(0.04);
-          document.getElementById("commentMsg").style.display="block";
+      document.body.appendChild(popup);
 
-          setTimeout(()=>{
-            popup.remove();
-            isWatching = false;
-          },3000);
-        });
-      }
-    },500);
-  };
-}
+      document.getElementById("commentBtn").onclick = ()=>{
+        popup.remove();
+
+        // Load a random task from taskQueue
+        let availableTasks = taskQueue.filter(t => !tasksCompleted[t]);
+        if(availableTasks.length === 0){
+          availableTasks = taskQueue.slice(); // reset if all done
+          tasksCompleted = {};
+        }
+        let randomTaskId = availableTasks[Math.floor(Math.random()*availableTasks.length)];
+
+        const commentPopup = document.createElement("div");
+        commentPopup.style.position="fixed";
+        commentPopup.style.top="0";
+        commentPopup.style.left="0";
+        commentPopup.style.width="100%";
+        commentPopup.style.height="100%";
+        commentPopup.style.background="rgba(0,0,0,0.9)";
+        commentPopup.style.zIndex="999999999";
+        commentPopup.style.display="flex";
+        commentPopup.style.justifyContent="center";
+        commentPopup.style.alignItems="center";
+
+        commentPopup.innerHTML = `
+        <div style="background:#fff;padding:20px;border-radius:12px;text-align:center;width:85%;max-width:350px;">
+          <h3>📝 Comment Task</h3>
+          <adsgram-task data-block-id="${randomTaskId}" id="commentTask"></adsgram-task>
+        </div>
+        `;
+
+        document.body.appendChild(commentPopup);
+
+        setTimeout(()=>{
+          let taskEl = document.getElementById("commentTask");
+          if(taskEl){
+            taskEl.addEventListener("reward",()=>{
+              addReward(0.05);
+              tasksCompleted[randomTaskId] = true;
+              localStorage.setItem(tasksKey, JSON.stringify(tasksCompleted));
+              alert("🎉 You're successful! Commented on the video. Thanks for your feedback. You also earned $0.05 for watching videos.");
+              commentPopup.remove();
+            });
+          }
+        },500);
+      };
+    }
+  }catch(e){
+    console.log(e);
+  }
+});
 
 /* TASK SYSTEM */
 document.getElementById("taskBtn").addEventListener("click",()=>{
@@ -280,7 +319,7 @@ function loadTask(id){
   });
 }
 
-/* WITHDRAW */
+/* WITHDRAW (MIN $2) */
 document.getElementById("withdrawBtn").addEventListener("click",()=>{
   if(balance<2) return alert("❌ Minimum withdraw is $2");
 
