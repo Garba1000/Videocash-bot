@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>Watch & Earn</title>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    overflow-x: hidden;
+  }
+
+  #mainContainer {
+    display: none;
+    padding: 20px;
+    margin-top: 30px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .button {
+    display: block;
+    width: 220px;
+    margin: 10px auto;
+    padding: 12px 20px;
+    background: #007bff;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  #joinPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 999999999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 25px;
+  }
+
+  #popupBox {
+    background: #ffffff10;
+    padding: 30px 20px;
+    border-radius: 14px;
+    width: 85%;
+    max-width: 380px;
+    text-align: center;
+    backdrop-filter: blur(7px);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  #popupBox h2 {
+    color: white;
+    font-size: 22px;
+    margin-bottom: 25px;
+    line-height: 1.4;
+  }
+
+  #popupButton {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: #ff3b30;
+    color: white;
+    font-size: 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  #taskMessage {
+    display:none;
+    color:#00ff00;
+    font-weight:bold;
+    margin-top:10px;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- JOIN CHANNEL POPUP -->
+<div id="joinPopup">
+  <div id="popupBox">
+    <h2>🚫 You must join our channel to continue</h2>
+    <a id="popupButton"
+       href="https://t.me/earnzoners"
+       target="_blank"
+       onclick="joinChannelClicked()">
+       👉 Join Telegram Channel
+    </a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContainer">
+  <h1>🎥 Watch & Earn</h1>
+
+  <p>💰 Balance: $<span id="balance">0.00</span></p>
+
+  <p>👥 Referrals: <span id="referrals">0</span></p>
+
+  <p style="color:#888;font-size:14px;">
+  ⚠️ You earn reward only after the person you invited completes launch the bot.
+  </p>
+
+  <button class="button" id="referralBtn">🔗 Copy Referral Link</button>
+  <button class="button" id="watchBtn">🎥 Watch Videos</button>
+  <button class="button" id="taskBtn">✅ Task</button>
+  <button class="button" id="withdrawBtn">💵 Withdraw</button>
+
+  <div id="taskSection" style="display:none;">
+    <h3>Complete Task</h3>
+    <adsgram-task id="currentTask" data-block-id="task-22205"></adsgram-task>
+    <div id="taskMessage">🎉 Social task completed successfully!</div>
+  </div>
+</div>
+
+<script>
+const tg = window.Telegram.WebApp;
+tg.expand();
+
+const balanceKey='user_balance';
+const tasksKey='tasks_completed';
+
+const ADMIN_ID=6910486529;
+
+let balance=parseFloat(localStorage.getItem(balanceKey))||0.06;
+let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
+
+const taskQueue=["task-21541","task-21543","task-21544","task-22205"];
+let taskIndex=0;
+
+let adCount = 0;
+const rewardBlocks = ["23467","45874","47567"];
+
+async function getReferralCount(referrerId){
+  if(!referrerId) return 0;
+  let response=await fetch(`https://api.telebothost.com/bot/properties/get?key=refCount_${referrerId}`);
+  if(response.ok){
+    let data=await response.json();
+    return parseInt(data.value)||0;
+  }
+  return 0;
+}
+
+const urlParams=new URLSearchParams(window.location.search);
+const referrerId=urlParams.get('start');
+
+async function updateUI(){
+  document.getElementById("balance").textContent=balance.toFixed(2);
+  let totalRefs=await getReferralCount(referrerId);
+  document.getElementById("referrals").textContent=totalRefs;
+}
+updateUI();
+
+document.getElementById("referralBtn").addEventListener("click",()=>{
+  const link=`https://t.me/Watchvideosebot?start=${tg.initDataUnsafe.user.id}`;
+  navigator.clipboard.writeText(link);
+  alert("Referral link copied!");
+});
+
+const RewardAd=window.Adsgram.init({blockId:"21542"});
+
+function addReward(amount){
+  balance+=amount;
+  localStorage.setItem(balanceKey,balance.toFixed(2));
+  updateUI();
+}
+
+RewardAd.show().finally(()=>{
+  document.getElementById("joinPopup").style.display="flex";
+  document.getElementById("mainContainer").style.display="none";
+});
+
+function joinChannelClicked(){
+  window.open("https://t.me/earnzoners","_blank");
+
+  if(!localStorage.getItem('joined_channel')){
+    addReward(0.001);
+    localStorage.setItem('joined_channel',"yes");
+    updateUI();
+    alert("🎉 +$0.001 rewarded!");
+  }
+
+  document.getElementById("joinPopup").style.display="none";
+  document.getElementById("mainContainer").style.display="block";
+}
+
+document.getElementById("watchBtn").addEventListener("click", async ()=>{
+  let res = await RewardAd.show();
+
+  if(res.done){
+    adCount++;
+
+    if(adCount < 4){
+      alert(`🎥 Ad ${adCount}/4 done`);
+    }
+
+    if(adCount === 4){
+      adCount = 0;
+      let randomBlock = rewardBlocks[Math.floor(Math.random()*rewardBlocks.length)];
+      showRewardTask(randomBlock);
+    }
+  }
+});
+
+function showRewardTask(blockId){
+  let popup=document.createElement("div");
+  popup.style.position="fixed";
+  popup.style.top="0";
+  popup.style.left="0";
+  popup.style.width="100%";
+  popup.style.height="100%";
+  popup.style.background="rgba(0,0,0,0.9)";
+  popup.style.zIndex="999999999";
+  popup.style.display="flex";
+  popup.style.justifyContent="center";
+  popup.style.alignItems="center";
+
+  popup.innerHTML=`
+  <div style="background:#fff;padding:20px;border-radius:12px;text-align:center;width:85%;max-width:350px;">
+    <h3>🎁 Claim Reward</h3>
+    <adsgram-task data-block-id="${blockId}" id="rewardTask"></adsgram-task>
+    <br><br>
+    <button id="commentBtn" style="padding:12px;background:#007bff;color:#fff;border:none;border-radius:8px;">
+      👉 Click here to Comment
+    </button>
+  </div>
+  `;
+
+  document.body.appendChild(popup);
+
+  setTimeout(()=>{
+    let taskEl=document.getElementById("rewardTask");
+    if(taskEl){
+      taskEl.addEventListener("reward",()=>{
+        addReward(0.03);
+        alert("🎉 Reward added!");
+        popup.remove();
+      });
+    }
+  },500);
+
+  document.getElementById("commentBtn").onclick=()=>{
+    window.open("https://t.me/earnzoners","_blank");
+  };
+}
+
+document.getElementById("taskBtn").addEventListener("click",()=>{
+  document.getElementById("taskSection").style.display="block";
+  loadTask(taskQueue[taskIndex]);
+});
+
+function loadTask(id){
+  const newTask=document.createElement("adsgram-task");
+  newTask.setAttribute("data-block-id",id);
+  newTask.id="currentTask";
+  document.getElementById("currentTask").replaceWith(newTask);
+
+  newTask.addEventListener("reward",()=>{
+    addReward(0.02);
+    tasksCompleted[id]=true;
+    localStorage.setItem(tasksKey,JSON.stringify(tasksCompleted));
+
+    if(taskIndex<taskQueue.length-1){
+      taskIndex++;
+    }else{
+      taskIndex=0;
+      const msg=document.getElementById("taskMessage");
+      msg.style.display="block";
+      setTimeout(()=>{msg.style.display="none";},30000);
+    }
+
+    loadTask(taskQueue[taskIndex]);
+  });
+}
+
+document.getElementById("withdrawBtn").addEventListener("click",()=>{
+  if(balance<5) return alert("❌ Minimum withdraw is $5");
+
+  tg.sendData(JSON.stringify({
+    action:"forward_to_admin",
+    admin_id:ADMIN_ID,
+    user_id:tg.initDataUnsafe.user.id,
+    amount:balance
+  }));
+
+  alert("✅ Withdrawal sent");
+  balance=0;
+  localStorage.setItem(balanceKey,balance.toFixed(2));
+  updateUI();
+});
+</script>
+
+</body>
+</html>
