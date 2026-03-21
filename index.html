@@ -146,6 +146,7 @@ let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
 const taskQueue=["task-21541","task-21543","task-21544","task-22205"];
 let taskIndex=0;
 
+/* WATCH SYSTEM */
 let adCount = 0;
 const rewardBlocks = ["23467","45874","47567"];
 
@@ -202,24 +203,35 @@ function joinChannelClicked(){
   document.getElementById("mainContainer").style.display="block";
 }
 
+/* AUTO 4 ADS SYSTEM */
 document.getElementById("watchBtn").addEventListener("click", async ()=>{
-  let res = await RewardAd.show();
 
-  if(res.done){
-    adCount++;
+  adCount = 0;
 
-    if(adCount < 4){
-      alert(`🎥 Ad ${adCount}/4 done`);
-    }
-
-    if(adCount === 4){
-      adCount = 0;
+  async function showAdsSequentially(){
+    if(adCount >= 4){
       let randomBlock = rewardBlocks[Math.floor(Math.random()*rewardBlocks.length)];
       showRewardTask(randomBlock);
+      return;
+    }
+
+    try{
+      let res = await RewardAd.show();
+
+      if(res.done){
+        adCount++;
+        showAdsSequentially();
+      }
+
+    }catch(e){
+      console.log(e);
     }
   }
+
+  showAdsSequentially();
 });
 
+/* POPUP REWARD */
 function showRewardTask(blockId){
   let popup=document.createElement("div");
   popup.style.position="fixed";
@@ -262,6 +274,7 @@ function showRewardTask(blockId){
   };
 }
 
+/* TASK SYSTEM */
 document.getElementById("taskBtn").addEventListener("click",()=>{
   document.getElementById("taskSection").style.display="block";
   loadTask(taskQueue[taskIndex]);
