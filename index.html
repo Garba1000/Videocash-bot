@@ -140,12 +140,9 @@ h1{
 
   <div class="stats">
     <p>💰 Balance: $<span id="balance">0.00</span></p>
-    <p>👥 Referrals: <span id="referrals">0</span></p>
   </div>
 
-  <p style="color:#ccc;font-size:13px;">
-  ⚠️ You earn reward only after the person you invited completes launch the bot.
-  </p>
+  <!-- Removed referral message -->
 
   <!-- BUTTONS ORDER: Watch Videos → Task → Withdraw → Referral -->
   <button class="button" id="watchBtn">🎥 Watch Videos</button>
@@ -193,8 +190,7 @@ const referrerId=urlParams.get('start');
 
 async function updateUI(){
   document.getElementById("balance").textContent=balance.toFixed(2);
-  let totalRefs=await getReferralCount(referrerId);
-  document.getElementById("referrals").textContent=totalRefs;
+  // Removed referral count display
 }
 updateUI();
 
