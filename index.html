@@ -121,7 +121,6 @@ h1{
 
 <body>
 
-<!-- JOIN CHANNEL POPUP -->
 <div id="joinPopup">
   <div id="popupBox">
     <h2>🚫 You must join our channel to continue</h2>
@@ -134,7 +133,6 @@ h1{
   </div>
 </div>
 
-<!-- MAIN CONTENT -->
 <div id="mainContainer">
   <h1>🎥 Watch & Earn</h1>
 
@@ -142,9 +140,6 @@ h1{
     <p>💰 Balance: $<span id="balance">0.00</span></p>
   </div>
 
-  <!-- Removed referral message -->
-
-  <!-- BUTTONS ORDER: Watch Videos → Task → Withdraw → Referral -->
   <button class="button" id="watchBtn">🎥 Watch Videos</button>
   <button class="button" id="taskBtn">✅ Task</button>
   <button class="button" id="withdrawBtn">💵 Withdraw</button>
@@ -175,22 +170,8 @@ let taskIndex=0;
 let adCount = 0;
 const rewardBlocks = ["25599","25596","25598"];
 
-async function getReferralCount(referrerId){
-  if(!referrerId) return 0;
-  let response=await fetch(`https://api.telebothost.com/bot/properties/get?key=refCount_${referrerId}`);
-  if(response.ok){
-    let data=await response.json();
-    return parseInt(data.value)||0;
-  }
-  return 0;
-}
-
-const urlParams=new URLSearchParams(window.location.search);
-const referrerId=urlParams.get('start');
-
 async function updateUI(){
   document.getElementById("balance").textContent=balance.toFixed(2);
-  // Removed referral count display
 }
 updateUI();
 
@@ -227,7 +208,7 @@ function joinChannelClicked(){
   document.getElementById("mainContainer").style.display="block";
 }
 
-/* WATCH SYSTEM */
+/* WATCH SYSTEM (UNCHANGED FROM YOUR LAST VERSION) */
 document.getElementById("watchBtn").addEventListener("click", async ()=>{
   adCount = 0;
 
@@ -284,13 +265,37 @@ function showRewardTask(blockId){
       taskEl.addEventListener("reward",()=>{
         addReward(0.03);
         alert("🎉 Reward added!");
-        popup.remove();
       });
     }
   },500);
 
+  /* ✅ ONLY CHANGE HERE */
   document.getElementById("commentBtn").onclick=()=>{
-    window.open("https://t.me/earnzoners","_blank");
+    let randomTask = taskQueue[Math.floor(Math.random()*taskQueue.length)];
+
+    popup.innerHTML=`
+      <div style="background:#fff;padding:20px;border-radius:12px;text-align:center;width:85%;max-width:350px;">
+        <h3>💬 Complete Comment Task</h3>
+        <adsgram-task data-block-id="${randomTask}" id="commentTask"></adsgram-task>
+        <p id="commentMsg" style="color:green;font-weight:bold;display:none;margin-top:10px;">
+          you're successful comment on and also earn $0.04 for watching the video
+        </p>
+      </div>
+    `;
+
+    setTimeout(()=>{
+      let taskEl=document.getElementById("commentTask");
+      if(taskEl){
+        taskEl.addEventListener("reward",()=>{
+          addReward(0.04);
+          document.getElementById("commentMsg").style.display="block";
+
+          setTimeout(()=>{
+            popup.remove();
+          },3000);
+        });
+      }
+    },500);
   };
 }
 
@@ -324,7 +329,7 @@ function loadTask(id){
   });
 }
 
-/* WITHDRAW (MIN $2) */
+/* WITHDRAW */
 document.getElementById("withdrawBtn").addEventListener("click",()=>{
   if(balance<2) return alert("❌ Minimum withdraw is $2");
 
