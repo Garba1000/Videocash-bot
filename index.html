@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <title>Watch & Earn</title>
 
@@ -147,10 +147,11 @@ h1{
   ⚠️ You earn reward only after the person you invited completes launch the bot.
   </p>
 
-  <button class="button" id="referralBtn">🔗 Copy Referral Link</button>
+  <!-- BUTTONS ORDER: Watch Videos → Task → Withdraw → Referral -->
   <button class="button" id="watchBtn">🎥 Watch Videos</button>
   <button class="button" id="taskBtn">✅ Task</button>
   <button class="button" id="withdrawBtn">💵 Withdraw</button>
+  <button class="button" id="referralBtn">🔗 Copy Referral Link</button>
 
   <div id="taskSection" style="display:none;">
     <h3>Complete Task</h3>
@@ -160,7 +161,6 @@ h1{
 </div>
 
 <script>
-/* YOUR ORIGINAL JS FULLY PRESERVED */
 const tg = window.Telegram.WebApp;
 tg.expand();
 
@@ -328,8 +328,9 @@ function loadTask(id){
   });
 }
 
+/* WITHDRAW (MIN $2) */
 document.getElementById("withdrawBtn").addEventListener("click",()=>{
-  if(balance<5) return alert("❌ Minimum withdraw is $5");
+  if(balance<2) return alert("❌ Minimum withdraw is $2");
 
   tg.sendData(JSON.stringify({
     action:"forward_to_admin",
