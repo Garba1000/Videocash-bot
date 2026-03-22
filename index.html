@@ -154,7 +154,6 @@ const tasksKey='tasks_completed';
 
 const ADMIN_ID=6910486529;
 
-/* ✅ FIXED BALANCE (NO DEFAULT 1 OR 0.06) */
 let balance = localStorage.getItem(balanceKey) !== null 
   ? parseFloat(localStorage.getItem(balanceKey)) 
   : 0;
@@ -179,7 +178,6 @@ document.getElementById("referralBtn").addEventListener("click",()=>{
 
 const RewardAd=window.Adsgram.init({blockId:"25597"});
 
-/* ✅ FIXED SAVE */
 function addReward(amount){
   balance += amount;
   localStorage.setItem(balanceKey, balance);
@@ -242,13 +240,32 @@ commentBtn.addEventListener("click", () => {
   const oldTask = document.getElementById("currentTask");
   if (oldTask) oldTask.replaceWith(newTask);
 
-  newTask.addEventListener("reward", () => {
-    addReward(0.05);
-    tasksCompleted[randomTaskId] = true;
-    localStorage.setItem(tasksKey, JSON.stringify(tasksCompleted));
-    alert("🎉 You're successful! Commented and earned $0.05.");
-    taskSection.style.display = "none";
+  /* ✅ UPDATED LOGIC ONLY HERE */
+  newTask.addEventListener("reward", async () => {
+
+    const rewardAd23575 = window.Adsgram.init({ blockId: "23575" });
+
+    try {
+      let res = await rewardAd23575.show();
+
+      if (res && res.done) {
+
+        addReward(0.05);
+
+        tasksCompleted[randomTaskId] = true;
+        localStorage.setItem(tasksKey, JSON.stringify(tasksCompleted));
+
+        alert("🎉 You're successful! Commented and earned $0.05.");
+
+        taskSection.style.display = "none";
+        commentBtn.style.display = "none";
+
+      }
+
+    } catch (e) {}
+
   });
+
 });
 
 /* TASK SYSTEM */
@@ -281,7 +298,7 @@ function loadTask(id){
   });
 }
 
-/* ✅ WITHDRAW UPDATED TO $6 */
+/* WITHDRAW */
 document.getElementById("withdrawBtn").addEventListener("click",()=>{
   if(balance < 6) return alert("❌ Minimum withdraw is $6");
 
