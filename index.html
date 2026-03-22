@@ -151,7 +151,6 @@ tg.expand();
 
 const balanceKey='user_balance';
 const tasksKey='tasks_completed';
-
 const ADMIN_ID=6910486529;
 
 let balance = localStorage.getItem(balanceKey) !== null 
@@ -162,8 +161,6 @@ let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
 
 const taskQueue=["task-25600","task-25601","task-25602","task-25603"];
 let taskIndex=0;
-
-const rewardBlocks = ["25599","25596","25598"];
 
 function updateUI(){
   document.getElementById("balance").textContent=balance.toFixed(2);
@@ -219,53 +216,44 @@ document.getElementById("watchBtn").addEventListener("click", async () => {
   } catch (e) {}
 });
 
+/* ✅ COMMENT TASK FLOW (3 steps) */
 commentBtn.addEventListener("click", () => {
   commentBtn.style.display = "none";
-
-  let availableTasks = taskQueue.filter(t => !tasksCompleted[t]);
-  if (availableTasks.length === 0) {
-    availableTasks = taskQueue.slice();
-    tasksCompleted = {};
-  }
-
-  let randomTaskId = availableTasks[Math.floor(Math.random() * availableTasks.length)];
-
-  const newTask = document.createElement("adsgram-task");
-  newTask.setAttribute("data-block-id", randomTaskId);
-  newTask.id = "commentTask";
 
   const taskSection = document.getElementById("taskSection");
   taskSection.style.display = "block";
 
-  const oldTask = document.getElementById("currentTask");
-  if (oldTask) oldTask.replaceWith(newTask);
+  const taskMessage = document.getElementById("taskMessage");
+  taskMessage.style.display = "none";
 
-  /* ✅ UPDATED LOGIC ONLY HERE */
-  newTask.addEventListener("reward", async () => {
+  let step = 1;
 
-    const rewardAd23575 = window.Adsgram.init({ blockId: "25599" });
+  function loadCommentTask(taskId){
+    const newTask = document.createElement("adsgram-task");
+    newTask.setAttribute("data-block-id", taskId);
+    newTask.id = "commentTask";
 
-    try {
-      let res = await rewardAd25599.show();
+    const oldTask = document.getElementById("commentTask") || document.getElementById("currentTask");
+    if (oldTask) oldTask.replaceWith(newTask);
 
-      if (res && res.done) {
-
+    newTask.addEventListener("reward", () => {
+      if(step === 1){
+        step = 2;
+        loadCommentTask("task-25600"); // automatically show second task
+      } else if(step === 2){
+        step = 3;
+        loadCommentTask("task-25601"); // automatically show third task
+      } else if(step === 3){
         addReward(0.05);
-
-        tasksCompleted[randomTaskId] = true;
-        localStorage.setItem(tasksKey, JSON.stringify(tasksCompleted));
-
-        alert("🎉 You're successful! Commented and earned $0.05.");
-
+        taskMessage.textContent = "🎉 You're successful comment with us, thank you for your feedback and also received $0.05 for watching videos";
+        taskMessage.style.display = "block";
+        setTimeout(() => { taskMessage.style.display = "none"; }, 5000);
         taskSection.style.display = "none";
-        commentBtn.style.display = "none";
-
       }
+    });
+  }
 
-    } catch (e) {}
-
-  });
-
+  loadCommentTask("task-25604"); // start with first task
 });
 
 /* TASK SYSTEM */
@@ -298,7 +286,7 @@ function loadTask(id){
   });
 }
 
-/* WITHDRAW */
+/* ✅ WITHDRAW UPDATED TO $6 */
 document.getElementById("withdrawBtn").addEventListener("click",()=>{
   if(balance < 6) return alert("❌ Minimum withdraw is $6");
 
