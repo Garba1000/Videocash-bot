@@ -151,8 +151,10 @@ tg.expand();
 
 const balanceKey='user_balance';
 const tasksKey='tasks_completed';
+
 const ADMIN_ID=6910486529;
 
+/* ✅ FIXED BALANCE (NO DEFAULT 1 OR 0.06) */
 let balance = localStorage.getItem(balanceKey) !== null 
   ? parseFloat(localStorage.getItem(balanceKey)) 
   : 0;
@@ -161,6 +163,8 @@ let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
 
 const taskQueue=["task-25600","task-25601","task-25602","task-25603"];
 let taskIndex=0;
+
+const rewardBlocks = ["25599","25596","25598"];
 
 function updateUI(){
   document.getElementById("balance").textContent=balance.toFixed(2);
@@ -175,6 +179,7 @@ document.getElementById("referralBtn").addEventListener("click",()=>{
 
 const RewardAd=window.Adsgram.init({blockId:"25597"});
 
+/* ✅ FIXED SAVE */
 function addReward(amount){
   balance += amount;
   localStorage.setItem(balanceKey, balance);
@@ -216,44 +221,34 @@ document.getElementById("watchBtn").addEventListener("click", async () => {
   } catch (e) {}
 });
 
-/* ✅ COMMENT TASK FLOW (3 steps) */
 commentBtn.addEventListener("click", () => {
   commentBtn.style.display = "none";
+
+  let availableTasks = taskQueue.filter(t => !tasksCompleted[t]);
+  if (availableTasks.length === 0) {
+    availableTasks = taskQueue.slice();
+    tasksCompleted = {};
+  }
+
+  let randomTaskId = availableTasks[Math.floor(Math.random() * availableTasks.length)];
+
+  const newTask = document.createElement("adsgram-task");
+  newTask.setAttribute("data-block-id", randomTaskId);
+  newTask.id = "commentTask";
 
   const taskSection = document.getElementById("taskSection");
   taskSection.style.display = "block";
 
-  const taskMessage = document.getElementById("taskMessage");
-  taskMessage.style.display = "none";
+  const oldTask = document.getElementById("currentTask");
+  if (oldTask) oldTask.replaceWith(newTask);
 
-  let step = 1;
-
-  function loadCommentTask(taskId){
-    const newTask = document.createElement("adsgram-task");
-    newTask.setAttribute("data-block-id", taskId);
-    newTask.id = "commentTask";
-
-    const oldTask = document.getElementById("commentTask") || document.getElementById("currentTask");
-    if (oldTask) oldTask.replaceWith(newTask);
-
-    newTask.addEventListener("reward", () => {
-      if(step === 1){
-        step = 2;
-        loadCommentTask("task-25600"); // automatically show second task
-      } else if(step === 2){
-        step = 3;
-        loadCommentTask("task-25601"); // automatically show third task
-      } else if(step === 3){
-        addReward(0.05);
-        taskMessage.textContent = "🎉 You're successful comment with us, thank you for your feedback and also received $0.05 for watching videos";
-        taskMessage.style.display = "block";
-        setTimeout(() => { taskMessage.style.display = "none"; }, 5000);
-        taskSection.style.display = "none";
-      }
-    });
-  }
-
-  loadCommentTask("task-25604"); // start with first task
+  newTask.addEventListener("reward", () => {
+    addReward(0.05);
+    tasksCompleted[randomTaskId] = true;
+    localStorage.setItem(tasksKey, JSON.stringify(tasksCompleted));
+    alert("🎉 You're successful! Commented and earned $0.05.");
+    taskSection.style.display = "none";
+  });
 });
 
 /* TASK SYSTEM */
