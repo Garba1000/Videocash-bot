@@ -159,7 +159,7 @@ let balance = localStorage.getItem(balanceKey) !== null
 
 let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
 
-const taskQueue=["task-25600","task-25601","task-25602","task-25603"];
+const taskQueue=["task-26537","task-26541","task-26539","task-26540"];
 let taskIndex=0;
 
 function updateUI(){
@@ -239,10 +239,10 @@ commentBtn.addEventListener("click", () => {
     newTask.addEventListener("reward", () => {
       if(step === 1){
         step = 2;
-        loadCommentTask("task-25600"); // automatically show second task
+        loadCommentTask("task-26537"); // automatically show second task
       } else if(step === 2){
         step = 3;
-        loadCommentTask("task-25601"); // automatically show third task
+        loadCommentTask("task-26538"); // automatically show third task
       } else if(step === 3){
         addReward(0.05);
         taskMessage.textContent = "🎉 You're successful comment with us, thank you for your feedback and also received $0.05 for watching videos";
@@ -253,12 +253,12 @@ commentBtn.addEventListener("click", () => {
     });
   }
 
-  loadCommentTask("task-25604"); // start with first task
+  loadCommentTask("task-26538"); // start with first task
 });
 
 /* TASK SYSTEM */
 document.getElementById("taskBtn").addEventListener("click",()=>{
-  document.getElementById("taskSection").style.display="block";
+  document.getElementById("taskSection").syle.display="block";
   loadTask(taskQueue[taskIndex]);
 });
 
