@@ -161,7 +161,7 @@ let balance = localStorage.getItem(balanceKey) !== null
 
 let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
 
-const taskQueue=["task-25600","task-25601","task-25602","task-25603"];
+const taskQueue=["task-26541","task-26539","task-26540","task-26537"];
 let taskIndex=0;
 
 const rewardBlocks = ["26534","26535","26536"];
