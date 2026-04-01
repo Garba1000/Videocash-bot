@@ -164,7 +164,7 @@ let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
 const taskQueue=["task-25600","task-25601","task-25602","task-25603"];
 let taskIndex=0;
 
-const rewardBlocks = ["25599","25596","25598"];
+const rewardBlocks = ["26534","26535","26536"];
 
 function updateUI(){
   document.getElementById("balance").textContent=balance.toFixed(2);
@@ -177,7 +177,7 @@ document.getElementById("referralBtn").addEventListener("click",()=>{
   alert("Referral link copied!");
 });
 
-const RewardAd=window.Adsgram.init({blockId:"25597"});
+const RewardAd=window.Adsgram.init({blockId:"26534"});
 
 /* ✅ FIXED SAVE */
 function addReward(amount){
