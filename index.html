@@ -6,7 +6,9 @@
 <title>Watch & Earn</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
+<!-- ✅ Adexium SDK -->
+<script src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
 
 <style>
 body {
@@ -173,18 +175,47 @@ document.getElementById("referralBtn").addEventListener("click",()=>{
   alert("Referral link copied!");
 });
 
-const RewardAd=window.Adsgram.init({blockId:"26534"});
+/* ✅ ADEXIUM INIT */
+let adexiumWidget;
+document.addEventListener('DOMContentLoaded', () => {
+  adexiumWidget = new AdexiumWidget({
+    wid: '90e5a2e4-d20d-4b2c-b4c9-9cdd89b5d2da',
+    adFormat: 'ime ad'
+  });
+});
 
+/* ✅ REWARD FUNCTION */
 function addReward(amount){
   balance += amount;
   localStorage.setItem(balanceKey, balance);
   updateUI();
 }
 
-RewardAd.show().finally(()=>{
+/* ✅ REAL AD WATCH REWARD */
+let adRunning = false;
+function showAdAndReward(callback){
+  if(adRunning) return;
+
+  adRunning = true;
+  adexiumWidget.autoMode();
+
+  let watchTime = 0;
+  const interval = setInterval(()=>{
+    watchTime++;
+    if(watchTime >= 5){ // Require 5 sec minimum
+      clearInterval(interval);
+      adRunning = false;
+      if(callback) callback(true);
+    }
+  },1000);
+}
+
+/* ✅ FIRST LOAD AD */
+setTimeout(()=>{
+  showAdAndReward();
   document.getElementById("joinPopup").style.display="flex";
   document.getElementById("mainContainer").style.display="none";
-});
+},3000);
 
 function joinChannelClicked(){
   window.open("https://t.me/earnzoners","_blank");
@@ -207,16 +238,16 @@ commentBtn.textContent = "💬 Comment";
 commentBtn.style.display = "none";
 document.getElementById("mainContainer").appendChild(commentBtn);
 
-document.getElementById("watchBtn").addEventListener("click", async () => {
-  try {
-    let res = await RewardAd.show();
-    if (res.done) {
+/* ✅ WATCH BUTTON */
+document.getElementById("watchBtn").addEventListener("click", () => {
+  showAdAndReward((done)=>{
+    if(done){
       commentBtn.style.display = "block";
     }
-  } catch (e) {}
+  });
 });
 
-/* ✅ COMMENT TASK FLOW (3 steps) */
+/* ✅ COMMENT FLOW */
 commentBtn.addEventListener("click", () => {
   commentBtn.style.display = "none";
 
@@ -239,10 +270,10 @@ commentBtn.addEventListener("click", () => {
     newTask.addEventListener("reward", () => {
       if(step === 1){
         step = 2;
-        loadCommentTask("task-26537"); // automatically show second task
+        loadCommentTask("task-26537");
       } else if(step === 2){
         step = 3;
-        loadCommentTask("task-26538"); // automatically show third task
+        loadCommentTask("task-26538");
       } else if(step === 3){
         addReward(0.05);
         taskMessage.textContent = "🎉 You're successful comment with us, thank you for your feedback and also received $0.05 for watching videos";
@@ -253,12 +284,12 @@ commentBtn.addEventListener("click", () => {
     });
   }
 
-  loadCommentTask("task-26538"); // start with first task
+  loadCommentTask("task-26538");
 });
 
 /* TASK SYSTEM */
 document.getElementById("taskBtn").addEventListener("click",()=>{
-  document.getElementById("taskSection").syle.display="block";
+  document.getElementById("taskSection").style.display="block";
   loadTask(taskQueue[taskIndex]);
 });
 
@@ -286,7 +317,7 @@ function loadTask(id){
   });
 }
 
-/* ✅ WITHDRAW UPDATED TO $6 */
+/* ✅ WITHDRAW */
 document.getElementById("withdrawBtn").addEventListener("click",()=>{
   if(balance < 6) return alert("❌ Minimum withdraw is $6");
 
