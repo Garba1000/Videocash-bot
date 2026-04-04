@@ -6,7 +6,6 @@
 <title>Watch & Earn</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
 <style>
 body {
@@ -18,16 +17,49 @@ body {
   color:#fff;
 }
 
+/* Adexium Popup */
+#adPopup {
+  position: fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.9);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:999999;
+}
+
+#adBox {
+  background:#111;
+  padding:15px;
+  border-radius:12px;
+  width:90%;
+  max-width:350px;
+}
+
+#adBox img {
+  width:100%;
+  border-radius:10px;
+}
+
+#adBox button {
+  margin-top:10px;
+  padding:12px;
+  width:100%;
+  border:none;
+  border-radius:8px;
+  background:#00c6ff;
+  color:#000;
+  font-weight:bold;
+}
+
 #mainContainer {
-  display: none;
   padding: 20px;
   margin: 30px auto;
   width: 90%;
   max-width: 400px;
   background: rgba(255,255,255,0.05);
   border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-  backdrop-filter: blur(8px);
 }
 
 .button {
@@ -39,110 +71,29 @@ body {
   color: white;
   border-radius: 10px;
   border: none;
-  font-size: 16px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.button:hover{
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(0,198,255,0.7);
-}
-
-h1{
-  margin-bottom:10px;
-}
-
-.stats{
-  background: rgba(255,255,255,0.08);
-  padding:12px;
-  border-radius:10px;
-  margin-bottom:15px;
-}
-
-#joinPopup {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.9);
-  z-index: 999999999;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  padding: 25px;
-}
-
-#popupBox {
-  background: #ffffff10;
-  padding: 30px 20px;
-  border-radius: 14px;
-  width: 85%;
-  max-width: 380px;
-  text-align: center;
-  backdrop-filter: blur(7px);
-  border: 1px solid rgba(255,255,255,0.15);
-}
-
-#popupBox h2 {
-  color: white;
-  font-size: 22px;
-  margin-bottom: 25px;
-}
-
-#popupButton {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(45deg,#007bff,#00c6ff);
-  color: white;
-  font-size: 18px;
-  border-radius: 10px;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-#taskMessage {
-  display:none;
-  color:#00ff00;
-  font-weight:bold;
-  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<div id="joinPopup">
-  <div id="popupBox">
-    <h2>🚫 You must join our channel to continue</h2>
-    <a id="popupButton"
-       href="https://t.me/earnzoners"
-       target="_blank"
-       onclick="joinChannelClicked()">
-       👉 Join Telegram Channel
-    </a>
+<!-- Adexium Popup -->
+<div id="adPopup">
+  <div id="adBox">
+    <img id="adImage" src="">
+    <button id="adBtn"></button>
   </div>
 </div>
 
 <div id="mainContainer">
   <h1>🎥 Watch & Earn</h1>
 
-  <div class="stats">
-    <p>💰 Balance: $<span id="balance">0.00</span></p>
-  </div>
+  <p>💰 Balance: $<span id="balance">0.00</span></p>
 
   <button class="button" id="watchBtn">🎥 Watch Videos</button>
   <button class="button" id="taskBtn">✅ Task</button>
   <button class="button" id="withdrawBtn">💵 Withdraw</button>
   <button class="button" id="referralBtn">🔗 Copy Referral Link</button>
-
-  <div id="taskSection" style="display:none;">
-    <h3>Complete Task</h3>
-    <adsgram-task id="currentTask" data-block-id="task-25604"></adsgram-task>
-    <div id="taskMessage">🎉 Social task completed successfully!</div>
-  </div>
 </div>
 
 <script>
@@ -150,149 +101,79 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 const balanceKey='user_balance';
-const tasksKey='tasks_completed';
-
 const ADMIN_ID=6910486529;
 
-/* ✅ FIXED BALANCE (NO DEFAULT 1 OR 0.06) */
-let balance = localStorage.getItem(balanceKey) !== null 
-  ? parseFloat(localStorage.getItem(balanceKey)) 
+let balance = localStorage.getItem(balanceKey)
+  ? parseFloat(localStorage.getItem(balanceKey))
   : 0;
-
-let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
-
-const taskQueue=["task-26541","task-26539","task-26540","task-26537"];
-let taskIndex=0;
-
-const rewardBlocks = ["26534","26535","26536"];
 
 function updateUI(){
   document.getElementById("balance").textContent=balance.toFixed(2);
 }
 updateUI();
 
-document.getElementById("referralBtn").addEventListener("click",()=>{
-  const link=`https://t.me/Postnewanbot?start=${tg.initDataUnsafe.user.id}`;
-  navigator.clipboard.writeText(link);
-  alert("Referral link copied!");
-});
-
-const RewardAd=window.Adsgram.init({blockId:"26534"});
-
-/* ✅ FIXED SAVE */
 function addReward(amount){
   balance += amount;
   localStorage.setItem(balanceKey, balance);
   updateUI();
 }
 
-RewardAd.show().finally(()=>{
-  document.getElementById("joinPopup").style.display="flex";
-  document.getElementById("mainContainer").style.display="none";
-});
-
-function joinChannelClicked(){
-  window.open("https://t.me/earnzoners","_blank");
-
-  if(!localStorage.getItem('joined_channel')){
-    addReward(0.001);
-    localStorage.setItem('joined_channel',"yes");
-    alert("🎉 +$0.001 rewarded!");
-  }
-
-  document.getElementById("joinPopup").style.display="none";
-  document.getElementById("mainContainer").style.display="block";
-}
-
-/* COMMENT BUTTON */
-const commentBtn = document.createElement("button");
-commentBtn.className = "button";
-commentBtn.id = "commentMenuBtn";
-commentBtn.textContent = "💬 Comment";
-commentBtn.style.display = "none";
-document.getElementById("mainContainer").appendChild(commentBtn);
-
-document.getElementById("watchBtn").addEventListener("click", async () => {
+/* 🔥 ADEXIUM FETCH */
+async function showAdexiumAd() {
   try {
-    let res = await RewardAd.show();
-    if (res.done) {
-      commentBtn.style.display = "block";
-    }
-  } catch (e) {}
-});
+    const user = tg.initDataUnsafe.user;
 
-commentBtn.addEventListener("click", () => {
-  commentBtn.style.display = "none";
+    let res = await fetch("https://bid.tgads.live/bot-request", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        wid: "99220c34-31b8-45f6-bff5-8bd896fd5e09",
+        language: "en",
+        isPremium: false,
+        firstName: user.first_name,
+        telegramId: user.id.toString()
+      })
+    });
 
-  let availableTasks = taskQueue.filter(t => !tasksCompleted[t]);
-  if (availableTasks.length === 0) {
-    availableTasks = taskQueue.slice();
-    tasksCompleted = {};
+    let ad = await res.json();
+
+    document.getElementById("adImage").src = ad.image;
+    document.getElementById("adBtn").innerText = ad.buttonText;
+
+    document.getElementById("adBtn").onclick = () => {
+      window.open(ad.clickUrl, "_blank");
+      document.getElementById("adPopup").style.display = "none";
+      addReward(0.02); // reward after ad
+    };
+
+    document.getElementById("adPopup").style.display = "flex";
+
+  } catch(e){
+    alert("Ad not available, try again.");
   }
-
-  let randomTaskId = availableTasks[Math.floor(Math.random() * availableTasks.length)];
-
-  const newTask = document.createElement("adsgram-task");
-  newTask.setAttribute("data-block-id", randomTaskId);
-  newTask.id = "commentTask";
-
-  const taskSection = document.getElementById("taskSection");
-  taskSection.style.display = "block";
-
-  const oldTask = document.getElementById("currentTask");
-  if (oldTask) oldTask.replaceWith(newTask);
-
-  newTask.addEventListener("reward", () => {
-    addReward(0.05);
-    tasksCompleted[randomTaskId] = true;
-    localStorage.setItem(tasksKey, JSON.stringify(tasksCompleted));
-    alert("🎉 You're successful! Commented and earned $0.05.");
-    taskSection.style.display = "none";
-  });
-});
-
-/* TASK SYSTEM */
-document.getElementById("taskBtn").addEventListener("click",()=>{
-  document.getElementById("taskSection").style.display="block";
-  loadTask(taskQueue[taskIndex]);
-});
-
-function loadTask(id){
-  const newTask=document.createElement("adsgram-task");
-  newTask.setAttribute("data-block-id",id);
-  newTask.id="currentTask";
-  document.getElementById("currentTask").replaceWith(newTask);
-
-  newTask.addEventListener("reward",()=>{
-    addReward(0.02);
-    tasksCompleted[id]=true;
-    localStorage.setItem(tasksKey,JSON.stringify(tasksCompleted));
-
-    if(taskIndex<taskQueue.length-1){
-      taskIndex++;
-    }else{
-      taskIndex=0;
-      const msg=document.getElementById("taskMessage");
-      msg.style.display="block";
-      setTimeout(()=>{msg.style.display="none";},30000);
-    }
-
-    loadTask(taskQueue[taskIndex]);
-  });
 }
 
-/* ✅ WITHDRAW UPDATED TO $6 */
+/* WATCH BUTTON */
+document.getElementById("watchBtn").addEventListener("click",()=>{
+  showAdexiumAd();
+});
+
+/* REFERRAL */
+document.getElementById("referralBtn").addEventListener("click",()=>{
+  const link=`https://t.me/Postnewanbot?start=${tg.initDataUnsafe.user.id}`;
+  navigator.clipboard.writeText(link);
+  alert("Copied!");
+});
+
+/* WITHDRAW */
 document.getElementById("withdrawBtn").addEventListener("click",()=>{
-  if(balance < 6) return alert("❌ Minimum withdraw is $6");
+  if(balance < 6) return alert("Minimum withdraw is $6");
 
   tg.sendData(JSON.stringify({
-    action:"forward_to_admin",
-    admin_id:ADMIN_ID,
-    user_id:tg.initDataUnsafe.user.id,
+    action:"withdraw",
     amount:balance
   }));
 
-  alert("✅ Withdrawal sent");
   balance=0;
   localStorage.setItem(balanceKey, balance);
   updateUI();
