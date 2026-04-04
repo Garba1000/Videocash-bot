@@ -7,6 +7,18 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+<!-- ADEXIUM INTERSTITIAL -->
+<script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        const adexiumWidget = new AdexiumWidget({
+            wid: '69ac8ac6-59da-4603-a9f7-1bfe1ade4399',
+            adFormat: 'interstitial'
+        });
+        adexiumWidget.autoMode();
+    });
+</script>
+
 <style>
 body {
   font-family: Arial, sans-serif;
@@ -15,42 +27,6 @@ body {
   padding: 0;
   text-align: center;
   color:#fff;
-}
-
-/* Adexium Popup */
-#adPopup {
-  position: fixed;
-  top:0;left:0;
-  width:100%;height:100%;
-  background:rgba(0,0,0,0.9);
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:999999;
-}
-
-#adBox {
-  background:#111;
-  padding:15px;
-  border-radius:12px;
-  width:90%;
-  max-width:350px;
-}
-
-#adBox img {
-  width:100%;
-  border-radius:10px;
-}
-
-#adBox button {
-  margin-top:10px;
-  padding:12px;
-  width:100%;
-  border:none;
-  border-radius:8px;
-  background:#00c6ff;
-  color:#000;
-  font-weight:bold;
 }
 
 #mainContainer {
@@ -76,14 +52,6 @@ body {
 </head>
 
 <body>
-
-<!-- Adexium Popup -->
-<div id="adPopup">
-  <div id="adBox">
-    <img id="adImage" src="">
-    <button id="adBtn"></button>
-  </div>
-</div>
 
 <div id="mainContainer">
   <h1>🎥 Watch & Earn</h1>
@@ -118,44 +86,9 @@ function addReward(amount){
   updateUI();
 }
 
-/* 🔥 ADEXIUM FETCH */
-async function showAdexiumAd() {
-  try {
-    const user = tg.initDataUnsafe.user;
-
-    let res = await fetch("https://bid.tgads.live/bot-request", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        wid: "99220c34-31b8-45f6-bff5-8bd896fd5e09",
-        language: "en",
-        isPremium: false,
-        firstName: user.first_name,
-        telegramId: user.id.toString()
-      })
-    });
-
-    let ad = await res.json();
-
-    document.getElementById("adImage").src = ad.image;
-    document.getElementById("adBtn").innerText = ad.buttonText;
-
-    document.getElementById("adBtn").onclick = () => {
-      window.open(ad.clickUrl, "_blank");
-      document.getElementById("adPopup").style.display = "none";
-      addReward(0.02); // reward after ad
-    };
-
-    document.getElementById("adPopup").style.display = "flex";
-
-  } catch(e){
-    alert("Ad not available, try again.");
-  }
-}
-
 /* WATCH BUTTON */
 document.getElementById("watchBtn").addEventListener("click",()=>{
-  showAdexiumAd();
+  alert("Ad loading...");
 });
 
 /* REFERRAL */
