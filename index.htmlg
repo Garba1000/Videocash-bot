@@ -7,20 +7,20 @@
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<!-- ✅ ADEXIUM IN HEAD (YOUR CODE) -->
+<!-- ✅ REAL ADEXIUM SCRIPT -->
 <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
 <script type="text/javascript">
 document.addEventListener('DOMContentLoaded', () => {
-    window.adexiumWidget = new AdexiumWidget({
+    const adexiumWidget = new AdexiumWidget({
         wid: '69ac8ac6-59da-4603-a9f7-1bfe1ade4399',
         adFormat: 'interstitial'
     });
     adexiumWidget.autoMode();
+    window.adexiumWidget = adexiumWidget; // Make globally accessible
 });
 </script>
 
 <style>
-/* ✅ ALL YOUR CSS UNCHANGED */
 body {
   font-family: Arial, sans-serif;
   background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
@@ -29,13 +29,42 @@ body {
   text-align: center;
   color:#fff;
 }
-/* (rest unchanged) */
+.button{
+  padding:12px;
+  margin:8px;
+  width:80%;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+}
+#joinPopup{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:#000c;
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+#popupBox{
+  background:#222;
+  padding:20px;
+  border-radius:12px;
+}
+#popupButton{
+  display:inline-block;
+  margin-top:10px;
+  padding:10px;
+  background:red;
+  color:#fff;
+  text-decoration:none;
+  border-radius:8px;
+}
 </style>
 </head>
 
 <body>
 
-<!-- ✅ ALL YOUR HTML UNCHANGED -->
 <div id="joinPopup">
   <div id="popupBox">
     <h2>🚫 You must join our channel to continue</h2>
@@ -62,8 +91,7 @@ body {
 
   <div id="taskSection" style="display:none;">
     <h3>Complete Task</h3>
-    <adsgram-task id="currentTask" data-block-id="task-25604"></adsgram-task>
-    <div id="taskMessage">🎉 Social task completed successfully!</div>
+    <div id="taskMessage">🎉 Task completed successfully!</div>
   </div>
 </div>
 
@@ -72,51 +100,53 @@ const tg = window.Telegram.WebApp;
 tg.expand();
 
 const balanceKey='user_balance';
-const tasksKey='tasks_completed';
 const ADMIN_ID=6910486529;
 
 let balance = localStorage.getItem(balanceKey) !== null 
   ? parseFloat(localStorage.getItem(balanceKey)) 
   : 0;
 
-let tasksCompleted=JSON.parse(localStorage.getItem(tasksKey))||{};
-
-const taskQueue=["task-26537","task-26541","task-26539","task-26540"];
-let taskIndex=0;
-
 function updateUI(){
   document.getElementById("balance").textContent=balance.toFixed(2);
 }
 updateUI();
 
+/* REFERRAL */
 document.getElementById("referralBtn").addEventListener("click",()=>{
   const link=`https://t.me/Postnewanbot?start=${tg.initDataUnsafe.user.id}`;
   navigator.clipboard.writeText(link);
   alert("Referral link copied!");
 });
 
-/* ✅ REWARD FUNCTION */
+/* REWARD */
 function addReward(amount){
   balance += amount;
   localStorage.setItem(balanceKey, balance);
   updateUI();
 }
 
-/* ✅ SIMPLE ADEXIUM TRIGGER (USED EVERYWHERE ADSGRAM WAS USED) */
-function showAd(){
+/* SHOW ADEXIUM AD */
+function showAd(callback){
   if(window.adexiumWidget){
-    adexiumWidget.autoMode();
+    adexiumWidget.showAd().then(()=>{
+      if(callback) callback();
+    }).catch(()=>{
+      if(callback) callback();
+    });
+  }else{
+    if(callback) callback();
   }
 }
 
-/* ✅ FIRST LOAD (REPLACED RewardAd.show) */
+/* PRELOAD ON START */
 setTimeout(()=>{
-  showAd();
+  showAd(()=>{
+    document.getElementById("joinPopup").style.display="flex";
+    document.getElementById("mainContainer").style.display="none";
+  });
+},2000);
 
-  document.getElementById("joinPopup").style.display="flex";
-  document.getElementById("mainContainer").style.display="none";
-},3000);
-
+/* JOIN CHANNEL */
 function joinChannelClicked(){
   window.open("https://t.me/earnzoners","_blank");
 
@@ -133,91 +163,65 @@ function joinChannelClicked(){
 /* COMMENT BUTTON */
 const commentBtn = document.createElement("button");
 commentBtn.className = "button";
-commentBtn.id = "commentMenuBtn";
 commentBtn.textContent = "💬 Comment";
 commentBtn.style.display = "none";
 document.getElementById("mainContainer").appendChild(commentBtn);
 
-/* ✅ WATCH BUTTON (REPLACED ADSGRAM) */
+/* WATCH BUTTON */
 document.getElementById("watchBtn").addEventListener("click", () => {
-  showAd();
-
-  setTimeout(()=>{
+  showAd(()=>{
+    addReward(0.005);
     commentBtn.style.display = "block";
-  },3000);
+  });
 });
 
-/* ✅ EVERYTHING BELOW UNCHANGED */
-
-/* COMMENT FLOW */
+/* COMMENT FLOW (SIMULATED TASKS) */
 commentBtn.addEventListener("click", () => {
   commentBtn.style.display = "none";
 
   const taskSection = document.getElementById("taskSection");
-  taskSection.style.display = "block";
-
   const taskMessage = document.getElementById("taskMessage");
+
+  taskSection.style.display = "block";
   taskMessage.style.display = "none";
 
-  let step = 1;
+  let step = 0;
 
-  function loadCommentTask(taskId){
-    const newTask = document.createElement("adsgram-task");
-    newTask.setAttribute("data-block-id", taskId);
-    newTask.id = "commentTask";
+  function nextStep(){
+    step++;
 
-    const oldTask = document.getElementById("commentTask") || document.getElementById("currentTask");
-    if (oldTask) oldTask.replaceWith(newTask);
+    if(step <= 3){
+      showAd(()=>{
+        nextStep();
+      });
+    }else{
+      addReward(0.05);
+      taskMessage.textContent = "🎉 Comment task completed +$0.05";
+      taskMessage.style.display = "block";
 
-    newTask.addEventListener("reward", () => {
-      if(step === 1){
-        step = 2;
-        loadCommentTask("task-26537");
-      } else if(step === 2){
-        step = 3;
-        loadCommentTask("task-26538");
-      } else if(step === 3){
-        addReward(0.05);
-        taskMessage.textContent = "🎉 You're successful comment with us, thank you for your feedback and also received $0.05 for watching videos";
-        taskMessage.style.display = "block";
-        setTimeout(() => { taskMessage.style.display = "none"; }, 5000);
-        taskSection.style.display = "none";
-      }
-    });
+      setTimeout(()=>{
+        taskSection.style.display="none";
+        taskMessage.style.display="none";
+      },5000);
+    }
   }
 
-  loadCommentTask("task-26538");
+  nextStep();
 });
 
-/* TASK SYSTEM */
+/* TASK BUTTON */
 document.getElementById("taskBtn").addEventListener("click",()=>{
-  document.getElementById("taskSection").style.display="block";
-  loadTask(taskQueue[taskIndex]);
-});
+  const section=document.getElementById("taskSection");
+  const msg=document.getElementById("taskMessage");
 
-function loadTask(id){
-  const newTask=document.createElement("adsgram-task");
-  newTask.setAttribute("data-block-id",id);
-  newTask.id="currentTask";
-  document.getElementById("currentTask").replaceWith(newTask);
+  section.style.display="block";
+  msg.style.display="none";
 
-  newTask.addEventListener("reward",()=>{
+  showAd(()=>{
     addReward(0.02);
-    tasksCompleted[id]=true;
-    localStorage.setItem(tasksKey,JSON.stringify(tasksCompleted));
-
-    if(taskIndex<taskQueue.length-1){
-      taskIndex++;
-    }else{
-      taskIndex=0;
-      const msg=document.getElementById("taskMessage");
-      msg.style.display="block";
-      setTimeout(()=>{msg.style.display="none";},30000);
-    }
-
-    loadTask(taskQueue[taskIndex]);
+    msg.style.display="block";
   });
-}
+});
 
 /* WITHDRAW */
 document.getElementById("withdrawBtn").addEventListener("click",()=>{
